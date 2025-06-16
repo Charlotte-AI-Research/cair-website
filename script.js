@@ -251,6 +251,46 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.background = 'linear-gradient(135deg, #3b82f6, #8b5cf6)';
         });
     }
+
+    // Gallery Auto-Scroll - Pure CSS Transform Approach
+    console.log('Script loaded!');
+    
+    setTimeout(() => {
+        console.log('Setting up gallery animation...');
+        
+        const galleryTrack = document.querySelector('.gallery-track');
+        
+        if (galleryTrack) {
+            console.log('Gallery track found');
+            
+            const galleryItems = galleryTrack.querySelectorAll('.gallery-item');
+            console.log('Found', galleryItems.length, 'gallery items');
+            
+            // Create CSS animation for infinite scroll
+            const styleSheet = document.createElement('style');
+            styleSheet.textContent = `
+                .gallery-track {
+                    animation: infiniteScroll 25s linear infinite;
+                }
+                
+                @keyframes infiniteScroll {
+                    0% {
+                        transform: translateX(0);
+                    }
+                    100% {
+                        transform: translateX(-50%);
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+            
+            console.log('Applied pure CSS infinite scroll animation');
+            console.log('Gallery will scroll continuously at faster speed');
+            
+        } else {
+            console.log('Gallery track not found');
+        }
+    }, 1000);
 });
 
 // Add CSS for ripple effect
