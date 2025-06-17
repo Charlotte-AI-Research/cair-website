@@ -291,6 +291,24 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Gallery track not found');
         }
     }, 1000);
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modal = document.getElementById('mediaModal');
+            if (modal.style.display === 'block') {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                
+                // Stop any playing videos
+                const videos = document.querySelectorAll('#modalMediaContainer video');
+                videos.forEach(video => {
+                    video.pause();
+                    video.currentTime = 0;
+                });
+            }
+        }
+    });
 });
 
 // Add CSS for ripple effect
@@ -320,4 +338,64 @@ style.textContent = `
         width: 100% !important;
     }
 `;
-document.head.appendChild(style); 
+document.head.appendChild(style);
+
+// Modal functionality for media preview (must be global for onclick handlers)
+function openModal(src, type) {
+    const modal = document.getElementById('mediaModal');
+    const container = document.getElementById('modalMediaContainer');
+    
+    // Clear previous content
+    container.innerHTML = '';
+    
+    if (type === 'image') {
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Preview';
+        container.appendChild(img);
+    } else if (type === 'video') {
+        const video = document.createElement('video');
+        video.controls = true;
+        video.autoplay = true;
+        
+        // Add multiple source formats
+        const sourceWebm = document.createElement('source');
+        sourceWebm.src = src.replace('.mov', '.webm');
+        sourceWebm.type = 'video/webm';
+        
+        const sourceMp4 = document.createElement('source');
+        sourceMp4.src = src.replace('.mov', '.mp4');
+        sourceMp4.type = 'video/mp4';
+        
+        const sourceMov = document.createElement('source');
+        sourceMov.src = src;
+        sourceMov.type = 'video/quicktime';
+        
+        video.appendChild(sourceWebm);
+        video.appendChild(sourceMp4);
+        video.appendChild(sourceMov);
+        
+        container.appendChild(video);
+    }
+    
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function closeModal(event) {
+    const modal = document.getElementById('mediaModal');
+    const modalContent = document.querySelector('.modal-content');
+    
+    // Close if clicking outside modal content or on close button
+    if (event.target === modal || event.target.classList.contains('modal-close')) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scrolling
+        
+        // Stop any playing videos
+        const videos = document.querySelectorAll('#modalMediaContainer video');
+        videos.forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+        });
+    }
+} 

@@ -74,29 +74,36 @@
                             <span>Basic understanding of machine learning</span>
                         </div>
                     </div>
+
+                    <h3>Get Involved</h3>
+                    <p>
+                        Join the discord server to stay informed about project meetings and updates. Reach out to the project lead, Brian Mohseni (bmohseni@charlotte.edu), for more information.
+                    </p>
+                    <a href="https://discord.gg/rdfh2B2kZq" target="_blank" class="contact-btn">Join Discord</a>
                 </div>
 
                 <div class="project-sidebar">
                     <div class="project-images">
                         <h3>Project Gallery</h3>
-                        <div class="image-placeholder">
-                            <i class="fas fa-image"></i>
-                            <p>EEG Setup</p>
+                        <div class="project-media-item" onclick="openModal('media/eeg_data.png', 'image')">
+                            <img src="media/eeg_data.png" alt="EEG Data Visualization" class="project-image">
+                            <p>EEG Data Preview</p>
                         </div>
-                        <div class="image-placeholder">
-                            <i class="fas fa-chart-line"></i>
-                            <p>Neural Signal Analysis</p>
+                        <div class="project-media-item" onclick="openModal('media/eeg_robot.mov', 'video')">
+                            <div class="video-container">
+                                <video class="project-video">
+                                    <source src="media/eeg_robot.mov" type="video/quicktime">
+                                    <source src="media/eeg_robot.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                                <div class="video-play-overlay"></div>
+                            </div>
+                            <p>EEG Robot Control Demo</p>
                         </div>
-                        <div class="image-placeholder">
-                            <i class="fas fa-brain"></i>
-                            <p>Brain Activity Visualization</p>
+                        <div class="project-media-item" onclick="openModal('media/muse.png', 'image')">
+                            <img src="media/muse.png" alt="Muse EEG Headband" class="project-image">
+                            <p><a href="https://choosemuse.com/pages/shop?utm_source=google&utm_medium=cpc&utm_campaign=US_SEM_Brand~Muse%20S&utm_term=muse%20device&utm_content=661932791223&gad_source=1&gad_campaignid=19591717090&gclid=CjwKCAjwpMTCBhA-EiwA_-MsmbBMc4i2j9BLQkX53aKUa8pUntTI0wziAF92TSQhNINvIYOaDNHgyRoCTSIQAvD_BwE" target="_blank" class="media-link">Muse EEG Headband</a></p>
                         </div>
-                    </div>
-
-                    <div class="project-contact">
-                        <h4>Get Involved</h4>
-                        <p>Interested in neural encoding research?</p>
-                        <a href="mailto:airesearch@charlotte.edu" class="contact-btn">Contact Us</a>
                     </div>
                 </div>
             </div>
@@ -127,6 +134,14 @@
             </div>
         </div>
     </footer>
+
+    <!-- Modal for media preview -->
+    <div id="mediaModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal(event)">&times;</span>
+            <div id="modalMediaContainer"></div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

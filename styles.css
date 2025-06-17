@@ -1141,7 +1141,7 @@ body {
 
 .project-layout {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1.8fr 1.2fr;
     gap: 3rem;
     max-width: 1200px;
     margin: 0 auto;
@@ -1202,47 +1202,273 @@ body {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    min-width: 280px;
 }
 
 .project-images {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 2rem;
-    border-radius: 12px;
-    border: 1px solid rgba(66, 214, 146, 0.2);
+    margin-bottom: 2rem;
 }
 
 .project-images h3 {
-    color: #42d692;
     font-size: 1.3rem;
-    margin-bottom: 1.5rem;
     font-weight: 600;
+    margin-bottom: 1rem;
+    color: #ffffff;
+}
+
+.project-media-item {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.project-media-item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 92, 246, 0.4);
+    box-shadow: 0 10px 20px rgba(139, 92, 246, 0.1);
+}
+
+.project-image {
+    width: 100%;
+    height: auto;
+    max-width: 85%;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.project-video {
+    width: 100%;
+    height: auto;
+    max-width: 85%;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    display: block;
+    position: relative;
+}
+
+.video-container {
+    position: relative;
+    display: inline-block;
+    width: 85%;
+}
+
+.video-play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.video-play-overlay:hover {
+    background: rgba(139, 92, 246, 0.8);
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.video-play-overlay::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 20px solid white;
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    margin-left: 4px;
+}
+
+.project-media-item p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.media-link {
+    color: #8b5cf6;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.media-link:hover {
+    color: #a78bfa;
+    text-decoration: underline;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    position: relative;
+    margin: 5% auto;
+    padding: 0;
+    max-width: 90%;
+    max-height: 90%;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2001;
+    background: rgba(0, 0, 0, 0.5);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: rgba(139, 92, 246, 0.8);
+    transform: scale(1.1);
+}
+
+#modalMediaContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+}
+
+#modalMediaContainer img {
+    max-width: 100%;
+    max-height: 80vh;
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+}
+
+#modalMediaContainer video {
+    max-width: 100%;
+    max-height: 80vh;
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Responsive modal */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 10% auto;
+        max-width: 95%;
+        max-height: 85%;
+    }
+    
+    .modal-close {
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        width: 35px;
+        height: 35px;
+    }
+}
+
+/* Responsive Design for Project Pages */
+@media (max-width: 768px) {
+    .project-layout {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .project-title-large {
+        font-size: 2rem;
+    }
+    
+    .project-icon-large {
+        font-size: 3rem;
+    }
+    
+    .project-hero {
+        padding: 100px 0 60px;
+    }
+    
+    .project-content {
+        padding: 60px 0;
+    }
 }
 
 .image-placeholder {
-    background: rgba(66, 214, 146, 0.1);
-    border: 2px dashed #42d692;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+    border: 2px dashed rgba(139, 92, 246, 0.3);
     border-radius: 8px;
-    padding: 2rem;
+    padding: 2rem 1rem;
     text-align: center;
     margin-bottom: 1rem;
     transition: all 0.3s ease;
 }
 
 .image-placeholder:hover {
-    background: rgba(66, 214, 146, 0.2);
-    transform: translateY(-2px);
+    border-color: rgba(139, 92, 246, 0.5);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
 }
 
 .image-placeholder i {
     font-size: 2rem;
-    color: #42d692;
+    color: #8b5cf6;
     margin-bottom: 0.5rem;
 }
 
 .image-placeholder p {
-    color: #b0b0b0;
-    font-size: 0.9rem;
     margin: 0;
+    color: #9ca3af;
+    font-weight: 500;
 }
 
 .project-contact {
@@ -1280,28 +1506,4 @@ body {
 .contact-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(66, 214, 146, 0.4);
-}
-
-/* Responsive Design for Project Pages */
-@media (max-width: 768px) {
-    .project-layout {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-    
-    .project-title-large {
-        font-size: 2rem;
-    }
-    
-    .project-icon-large {
-        font-size: 3rem;
-    }
-    
-    .project-hero {
-        padding: 100px 0 60px;
-    }
-    
-    .project-content {
-        padding: 60px 0;
-    }
 } 
