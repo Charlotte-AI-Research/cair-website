@@ -309,6 +309,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Try to load calendar events, but fall back to static events if it fails
+    calendarManager.init();
 });
 
 // Add CSS for ripple effect
@@ -398,4 +401,263 @@ function closeModal(event) {
             video.currentTime = 0;
         });
     }
+}
+
+// Google Calendar Integration
+class CalendarManager {
+    constructor() {
+        this.config = typeof CALENDAR_CONFIG !== 'undefined' ? CALENDAR_CONFIG : {
+            CALENDAR_ID: 'c_d50ea02d93d3f4550a3851ca08882e347c006117d02f302c4f2010cb86aa9f89@group.calendar.google.com',
+            API_KEY: '',
+            MAX_RESULTS: 6,
+            SHOW_PAST_EVENTS: false
+        };
+        
+        this.eventsGrid = null;
+        this.eventsLoading = null;
+        this.eventsError = null;
+    }
+    
+    init() {
+        this.eventsGrid = document.getElementById('events-grid');
+        this.eventsLoading = document.getElementById('events-loading');
+        this.eventsError = document.getElementById('events-error');
+        
+        if (!this.eventsGrid) {
+            console.error('Events grid element not found');
+            return;
+        }
+        
+        this.loadEvents();
+    }
+    
+    async loadEvents() {
+        this.showLoading();
+        
+        try {
+            // Check if API key is configured
+            if (!this.config.API_KEY || this.config.API_KEY === '') {
+                console.log('Google Calendar API key not configured, using static events');
+                this.showStaticEvents();
+                return;
+            }
+            
+            const events = await this.fetchCalendarEvents();
+            
+            if (events && events.length > 0) {
+                this.displayEvents(events);
+                console.log(`Loaded ${events.length} events from Google Calendar`);
+            } else {
+                console.log('No upcoming events found, using static events');
+                this.showStaticEvents();
+            }
+            
+        } catch (error) {
+            console.error('Error loading calendar events:', error);
+            this.showStaticEvents();
+        }
+    }
+    
+    async fetchCalendarEvents() {
+        const now = new Date().toISOString();
+        const timeMin = this.config.SHOW_PAST_EVENTS ? '' : `&timeMin=${now}`;
+        
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(this.config.CALENDAR_ID)}/events?key=${this.config.API_KEY}${timeMin}&maxResults=${this.config.MAX_RESULTS}&singleEvents=true&orderBy=startTime`;
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`Calendar API error: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        return data.items || [];
+    }
+    
+    displayEvents(events) {
+        this.eventsGrid.innerHTML = '';
+        
+        events.forEach(event => {
+            const eventCard = this.createEventCard(event);
+            this.eventsGrid.appendChild(eventCard);
+        });
+        
+        this.hideLoading();
+        this.eventsGrid.style.display = 'grid';
+    }
+    
+    createEventCard(event) {
+        const eventCard = document.createElement('div');
+        eventCard.className = 'event-card clickable-event';
+        
+        // Parse event date
+        const startTime = event.start.dateTime || event.start.date;
+        const eventDate = new Date(startTime);
+        const isAllDay = !event.start.dateTime;
+        
+        // Parse end time if available
+        const endTime = event.end ? (event.end.dateTime || event.end.date) : null;
+        const endDate = endTime ? new Date(endTime) : null;
+        
+        // Format date
+        const month = eventDate.toLocaleDateString('en-US', { month: 'short' });
+        const day = eventDate.getDate();
+        
+        // Format time
+        let timeString = '';
+        if (!isAllDay) {
+            timeString = eventDate.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+        } else {
+            timeString = 'All day';
+        }
+        
+        // Extract location from event
+        const location = event.location || 'Location TBD';
+        
+        // Clean up description (remove HTML tags and limit length)
+        let description = event.description || 'No description available';
+        description = description.replace(/<[^>]*>/g, ''); // Remove HTML tags
+        if (description.length > 150) {
+            description = description.substring(0, 150) + '...';
+        }
+        
+        // Create event card HTML with click indicator
+        eventCard.innerHTML = `
+            <div class="event-date">
+                <span class="month">${month}</span>
+                <span class="day">${day}</span>
+            </div>
+            <div class="event-content">
+                <h3 class="event-title">${event.summary || 'Untitled Event'}</h3>
+                <p class="event-description">${description}</p>
+                <div class="event-details">
+                    <span class="event-time"><i class="fas fa-clock"></i> ${timeString}</span>
+                    <span class="event-location"><i class="fas fa-map-marker-alt"></i> ${location}</span>
+                </div>
+                <div class="event-click-hint">
+                    <i class="fas fa-calendar-plus"></i> Click to add to your calendar
+                </div>
+            </div>
+        `;
+        
+        // Add click event listener to open Google Calendar
+        eventCard.addEventListener('click', () => {
+            const calendarUrl = this.createGoogleCalendarUrl(event);
+            window.open(calendarUrl, '_blank');
+        });
+        
+        // Add hover effect
+        eventCard.addEventListener('mouseenter', () => {
+            eventCard.style.cursor = 'pointer';
+        });
+        
+        return eventCard;
+    }
+    
+    createGoogleCalendarUrl(event) {
+        // Parse event dates
+        const startTime = event.start.dateTime || event.start.date;
+        const endTime = event.end ? (event.end.dateTime || event.end.date) : null;
+        
+        const startDate = new Date(startTime);
+        let endDate = endTime ? new Date(endTime) : new Date(startDate.getTime() + 60 * 60 * 1000); // Default 1 hour duration
+        
+        // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ format)
+        const formatDateForGoogle = (date) => {
+            return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+        };
+        
+        const formattedStart = formatDateForGoogle(startDate);
+        const formattedEnd = formatDateForGoogle(endDate);
+        
+        // Get event details - don't double encode
+        const title = event.summary || 'Event';
+        const description = (event.description || '').replace(/<[^>]*>/g, ''); // Remove HTML tags
+        const location = event.location || '';
+        
+        // Construct Google Calendar URL with proper encoding
+        const baseUrl = 'https://calendar.google.com/calendar/render';
+        const params = new URLSearchParams({
+            action: 'TEMPLATE',
+            text: title,
+            dates: `${formattedStart}/${formattedEnd}`,
+            details: description,
+            location: location,
+            sf: 'true',
+            output: 'xml'
+        });
+        
+        return `${baseUrl}?${params.toString()}`;
+    }
+    
+    showLoading() {
+        if (this.eventsLoading) {
+            this.eventsLoading.style.display = 'block';
+        }
+        if (this.eventsGrid) {
+            this.eventsGrid.style.display = 'none';
+        }
+        if (this.eventsError) {
+            this.eventsError.style.display = 'none';
+        }
+    }
+    
+    hideLoading() {
+        if (this.eventsLoading) {
+            this.eventsLoading.style.display = 'none';
+        }
+    }
+    
+    showStaticEvents() {
+        this.hideLoading();
+        if (this.eventsGrid) {
+            this.eventsGrid.style.display = 'grid';
+        }
+        // Static events are already in the HTML, so we just show them
+    }
+    
+    showError(message) {
+        this.hideLoading();
+        if (this.eventsError) {
+            this.eventsError.innerHTML = `<p>${message}</p>`;
+            this.eventsError.style.display = 'block';
+        }
+    }
+}
+
+// Initialize calendar manager
+const calendarManager = new CalendarManager();
+
+// Global function for static event clicks (must be global for onclick handlers)
+function addStaticEventToCalendar(title, description, startTime, endTime, location) {
+    // Parse dates
+    const startDate = new Date(startTime);
+    const endDate = new Date(endTime);
+    
+    // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ format)
+    const formatDateForGoogle = (date) => {
+        return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    };
+    
+    const formattedStart = formatDateForGoogle(startDate);
+    const formattedEnd = formatDateForGoogle(endDate);
+    
+    // Construct Google Calendar URL with proper encoding
+    const baseUrl = 'https://calendar.google.com/calendar/render';
+    const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: title,
+        dates: `${formattedStart}/${formattedEnd}`,
+        details: description,
+        location: location,
+        sf: 'true',
+        output: 'xml'
+    });
+    
+    const calendarUrl = `${baseUrl}?${params.toString()}`;
+    window.open(calendarUrl, '_blank');
 } 

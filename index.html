@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="config.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -18,7 +20,7 @@
             <div class="nav-shortcuts">
                 <a href="#events" class="nav-link">Events</a>
                 <a href="#about" class="nav-link">About</a>
-                <a href="#initiatives" class="nav-link">Initiatives</a>
+                <a href="#projects" class="nav-link">Projects</a>
                 <a href="#exec" class="nav-link">Exec</a>
             </div>
         </div>
@@ -150,8 +152,17 @@
     <section id="events" class="events">
         <div class="container">
             <h2 class="section-title">Upcoming Events</h2>
-            <div class="events-grid">
-                <div class="event-card">
+            <div id="events-loading" class="events-loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Loading upcoming events...</p>
+            </div>
+            <div id="events-error" class="events-error" style="display: none;">
+                <p>Unable to load events at this time. Please check back later.</p>
+            </div>
+            <div id="events-grid" class="events-grid">
+                <!-- Events will be dynamically loaded from Google Calendar -->
+                <!-- Fallback static events in case API fails -->
+                <div class="event-card clickable-event" onclick="addStaticEventToCalendar('Machine Learning Workshop', 'Introduction to neural networks and deep learning fundamentals', '2024-12-15T18:00:00', '2024-12-15T20:00:00', 'Room 204')">
                     <div class="event-date">
                         <span class="month">Dec</span>
                         <span class="day">15</span>
@@ -163,9 +174,12 @@
                             <span class="event-time"><i class="fas fa-clock"></i> 6:00 PM</span>
                             <span class="event-location"><i class="fas fa-map-marker-alt"></i> Room 204</span>
                         </div>
+                        <div class="event-click-hint">
+                            <i class="fas fa-calendar-plus"></i> Click to add to your calendar
+                        </div>
                     </div>
                 </div>
-                <div class="event-card">
+                <div class="event-card clickable-event" onclick="addStaticEventToCalendar('AI Ethics Symposium', 'Discussing the ethical implications of artificial intelligence', '2024-12-22T19:00:00', '2024-12-22T21:00:00', 'Auditorium')">
                     <div class="event-date">
                         <span class="month">Dec</span>
                         <span class="day">22</span>
@@ -177,9 +191,12 @@
                             <span class="event-time"><i class="fas fa-clock"></i> 7:00 PM</span>
                             <span class="event-location"><i class="fas fa-map-marker-alt"></i> Auditorium</span>
                         </div>
+                        <div class="event-click-hint">
+                            <i class="fas fa-calendar-plus"></i> Click to add to your calendar
+                        </div>
                     </div>
                 </div>
-                <div class="event-card">
+                <div class="event-card clickable-event" onclick="addStaticEventToCalendar('Research Showcase', 'Members present their latest AI research projects', '2025-01-08T17:30:00', '2025-01-08T19:30:00', 'Lab 301')">
                     <div class="event-date">
                         <span class="month">Jan</span>
                         <span class="day">8</span>
@@ -190,6 +207,9 @@
                         <div class="event-details">
                             <span class="event-time"><i class="fas fa-clock"></i> 5:30 PM</span>
                             <span class="event-location"><i class="fas fa-map-marker-alt"></i> Lab 301</span>
+                        </div>
+                        <div class="event-click-hint">
+                            <i class="fas fa-calendar-plus"></i> Click to add to your calendar
                         </div>
                     </div>
                 </div>
@@ -235,6 +255,12 @@
                     <span>Collaboration</span>
                 </div>
             </div>
+            <div class="about-cta">
+                <a href="lab.html" class="lab-btn">
+                    <i class="fas fa-microscope"></i>
+                    Check out our lab
+                </a>
+            </div>
         </div>
     </section>
 
@@ -275,11 +301,9 @@
                         <div class="membership-why">
                             <h5>Why Become a General Member?</h5>
                             <ul>
-                                <li>Lead and participate in research initiatives</li>
-                                <li>Access to computing resources and datasets</li>
-                                <li>Mentorship opportunities</li>
+                                <li></li>
+                                <li>Access to computing resources</li>
                                 <li>Priority access to industry partnerships</li>
-                                <li>Contribute to cutting-edge AI projects</li>
                             </ul>
                         </div>
                         <a href="#" target="_blank" class="membership-btn general-btn">Apply Now</a>
@@ -290,40 +314,40 @@
     </section>
 
     <!-- Initiatives Section -->
-    <section id="initiatives" class="initiatives">
+    <section id="projects" class="projects">
         <div class="container">
             <h2 class="section-title">Our Projects</h2>
-            <div class="initiatives-grid">
-                <a href="neural-encoding.html" class="initiative-card">
-                    <div class="initiative-icon">
+            <div class="projects-grid">
+                <a href="neural-encoding.html" class="project-card">
+                    <div class="project-icon">
                         <i class="fas fa-brain"></i>
                     </div>
                     <h3>Neural Encoding</h3>
                     <p>Using EEG and deep learning to decode neural signals and understand brain activity patterns.</p>
                 </a>
-                <a href="apollo.html" class="initiative-card">
-                    <div class="initiative-icon">
+                <a href="apollo.html" class="project-card">
+                    <div class="project-icon">
                         <i class="fas fa-robot"></i>
                     </div>
                     <h3>Apollo</h3>
                     <p>Autonomous robot designed to interact with people on campus and navigate complex environments.</p>
                 </a>
-                <a href="f1tenth.html" class="initiative-card">
-                    <div class="initiative-icon">
+                <a href="f1tenth.html" class="project-card">
+                    <div class="project-icon">
                         <i class="fas fa-car"></i>
                     </div>
                     <h3>F1Tenth</h3>
                     <p>Autonomous miniature racecar project focusing on high-speed navigation and real-time decision making.</p>
                 </a>
-                <div class="initiative-card placeholder">
-                    <div class="initiative-icon">
+                <div class="project-card placeholder">
+                    <div class="project-icon">
                         <i class="fas fa-cog"></i>
                     </div>
                     <h3>Coming Soon - Fall 2025</h3>
                     <p>Computer Vision + Fashion</p>
                 </div>
-                <div class="initiative-card placeholder">
-                    <div class="initiative-icon">
+                <div class="project-card placeholder">
+                    <div class="project-icon">
                         <i class="fas fa-cog"></i>
                     </div>
                     <h3>Coming Soon - Fall 2025</h3>
@@ -388,7 +412,7 @@
                 <div class="footer-links">
                     <a href="#about">About</a>
                     <a href="#events">Events</a>
-                    <a href="#initiatives">Initiatives</a>
+                    <a href="#projects">Projects</a>
                     <a href="#exec">Executive Team</a>
                 </div>
                 <div class="footer-social">
