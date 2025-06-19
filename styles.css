@@ -1304,6 +1304,7 @@ body {
     flex-direction: column;
     align-items: center;
     position: relative;
+    max-height: 300px;
 }
 
 .project-media-item:hover {
@@ -1315,26 +1316,31 @@ body {
 .project-image {
     width: 100%;
     height: auto;
-    max-width: 85%;
+    max-width: 100%;
+    max-height: 200px;
     border-radius: 6px;
     margin-bottom: 0.75rem;
     display: block;
+    object-fit: contain;
 }
 
 .project-video {
     width: 100%;
     height: auto;
-    max-width: 85%;
+    max-width: 100%;
+    max-height: 200px;
     border-radius: 6px;
     margin-bottom: 0.75rem;
     display: block;
     position: relative;
+    object-fit: contain;
 }
 
 .video-container {
     position: relative;
     display: inline-block;
-    width: 85%;
+    width: 100%;
+    max-height: 200px;
 }
 
 .video-play-overlay {
@@ -1516,6 +1522,44 @@ body {
     .project-content {
         padding: 60px 0;
     }
+    
+    .project-media-item {
+        max-height: 250px;
+    }
+    
+    .project-image,
+    .project-video {
+        max-height: 150px;
+    }
+    
+    .video-container {
+        max-height: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .project-media-item {
+        max-height: 200px;
+        padding: 0.5rem;
+    }
+    
+    .project-image,
+    .project-video {
+        max-height: 120px;
+    }
+    
+    .video-container {
+        max-height: 120px;
+    }
+    
+    .image-placeholder {
+        height: 150px;
+        padding: 1rem 0.5rem;
+    }
+    
+    .image-placeholder i {
+        font-size: 1.5rem;
+    }
 }
 
 .image-placeholder {
@@ -1526,6 +1570,11 @@ body {
     text-align: center;
     margin-bottom: 1rem;
     transition: all 0.3s ease;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .image-placeholder:hover {
@@ -2023,6 +2072,7 @@ body {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
     border: 1px solid rgba(139, 92, 246, 0.2);
     aspect-ratio: 4/3;
+    height: 250px;
 }
 
 .photo-item:hover {
@@ -2081,6 +2131,10 @@ body {
     .lab-photos h3 {
         font-size: 1.5rem;
     }
+    
+    .photo-item {
+        height: 200px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -2090,5 +2144,9 @@ body {
     
     .photo-overlay {
         padding: 1.5rem 1rem 1rem;
+    }
+    
+    .photo-item {
+        height: 180px;
     }
 } 
