@@ -122,24 +122,32 @@ body {
     width: 120px;
     height: 120px;
     background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    border-radius: 50%;
+    border-radius: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 2rem;
-    font-size: 3rem;
-    color: white;
     box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+    transition: all 0.3s ease;
+}
+
+.logo-image {
+    width: 400px;
+    height: 400px;
+    object-fit: contain;
+    margin: 0 auto;
+    display: block;
     transition: transform 0.3s ease;
 }
 
-.logo-placeholder:hover {
-    transform: scale(1.1) rotate(10deg);
+.logo-image:hover {
+    transform: scale(1.05);
 }
 
 .hero-title {
     font-size: 4rem;
     font-weight: 700;
+    margin-top: -6rem;
     margin-bottom: 1rem;
     background: linear-gradient(135deg, #ffffff, #e5e7eb);
     -webkit-background-clip: text;
@@ -2148,5 +2156,77 @@ body {
     
     .photo-item {
         height: 180px;
+    }
+} 
+
+/* Add CSS for new Membership & Leadership grid layout */
+.membership-leadership-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-top: 2rem;
+}
+
+.membership-section,
+.leadership-section {
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.membership-section:hover,
+.leadership-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+    border-color: rgba(139, 92, 246, 0.5);
+}
+
+.membership-section h3,
+.leadership-section h3 {
+    color: #8b5cf6;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.membership-section p,
+.leadership-section p {
+    color: #e2e8f0;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.leadership-link {
+    display: inline-block;
+    color: #8b5cf6;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.1rem;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-align: center;
+}
+
+.leadership-link:hover {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+}
+
+@media (max-width: 768px) {
+    .membership-leadership-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .membership-section,
+    .leadership-section {
+        padding: 2rem;
     }
 } 

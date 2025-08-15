@@ -408,7 +408,7 @@ class CalendarManager {
     constructor() {
         this.config = typeof CALENDAR_CONFIG !== 'undefined' ? CALENDAR_CONFIG : {
             CALENDAR_ID: 'c_d50ea02d93d3f4550a3851ca08882e347c006117d02f302c4f2010cb86aa9f89@group.calendar.google.com',
-            API_KEY: '',
+            API_KEY: 'AIzaSyBYBTzUSpumIfrOK4QGMl2DRX4wrGL_5w4',
             MAX_RESULTS: 6,
             SHOW_PAST_EVENTS: false
         };
@@ -416,15 +416,32 @@ class CalendarManager {
         this.eventsGrid = null;
         this.eventsLoading = null;
         this.eventsError = null;
+
+        try {
+            const maskedKey = this.config.API_KEY ? `${this.config.API_KEY.slice(0, 6)}...${this.config.API_KEY.slice(-4)}` : '(none)';
+            console.log('[Calendar] Constructor config:', {
+                calendarId: this.config.CALENDAR_ID,
+                apiKey: maskedKey,
+                maxResults: this.config.MAX_RESULTS,
+                showPastEvents: this.config.SHOW_PAST_EVENTS
+            });
+        } catch (_) {}
     }
     
     init() {
+        console.log('[Calendar] init() called');
         this.eventsGrid = document.getElementById('events-grid');
         this.eventsLoading = document.getElementById('events-loading');
         this.eventsError = document.getElementById('events-error');
         
+        console.log('[Calendar] Elements found:', {
+            hasGrid: !!this.eventsGrid,
+            hasLoading: !!this.eventsLoading,
+            hasError: !!this.eventsError
+        });
+        
         if (!this.eventsGrid) {
-            console.error('Events grid element not found');
+            console.error('[Calendar] Events grid element not found');
             return;
         }
         
@@ -432,49 +449,79 @@ class CalendarManager {
     }
     
     async loadEvents() {
+        console.log('[Calendar] loadEvents() starting');
         this.showLoading();
         
         try {
             // Check if API key is configured
-            if (!this.config.API_KEY || this.config.API_KEY === '') {
-                console.log('Google Calendar API key not configured, using static events');
-                this.showStaticEvents();
+            const hasApiKey = !!this.config.API_KEY && this.config.API_KEY !== '';
+            console.log('[Calendar] API key present?', hasApiKey);
+            if (!hasApiKey) {
+                console.log('[Calendar] Google Calendar API key not configured');
+                this.showError('Calendar integration not configured. Please check back later.');
                 return;
             }
             
             const events = await this.fetchCalendarEvents();
+            console.log('[Calendar] fetchCalendarEvents() returned', events ? events.length : 0, 'items');
             
             if (events && events.length > 0) {
                 this.displayEvents(events);
-                console.log(`Loaded ${events.length} events from Google Calendar`);
+                console.log(`[Calendar] Loaded ${events.length} events from Google Calendar`);
             } else {
-                console.log('No upcoming events found, using static events');
-                this.showStaticEvents();
+                console.log('[Calendar] No upcoming events found');
+                this.showError('No upcoming events scheduled at this time. Check back soon for new events!');
             }
             
         } catch (error) {
-            console.error('Error loading calendar events:', error);
-            this.showStaticEvents();
+            console.error('[Calendar] Error loading calendar events:', error);
+            this.showError('Unable to load events at this time. Please try refreshing the page.');
         }
     }
     
     async fetchCalendarEvents() {
-        const now = new Date().toISOString();
-        const timeMin = this.config.SHOW_PAST_EVENTS ? '' : `&timeMin=${now}`;
+        const now = new Date();
+        const startOfDayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const userTimeZone = (Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
         
-        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(this.config.CALENDAR_ID)}/events?key=${this.config.API_KEY}${timeMin}&maxResults=${this.config.MAX_RESULTS}&singleEvents=true&orderBy=startTime`;
+        // Move timeMin back 12 hours to avoid excluding ongoing/all-day events due to timezone offsets
+        const timeMinDate = new Date(startOfDayLocal.getTime() - 12 * 60 * 60 * 1000);
+        const timeMin = this.config.SHOW_PAST_EVENTS ? '' : `&timeMin=${encodeURIComponent(timeMinDate.toISOString())}`;
+        
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(this.config.CALENDAR_ID)}/events?key=${this.config.API_KEY}${timeMin}&maxResults=${this.config.MAX_RESULTS}&singleEvents=true&orderBy=startTime&timeZone=${encodeURIComponent(userTimeZone)}`;
+        
+        try {
+            console.log('[Calendar] Fetching events with params:', {
+                calendarId: this.config.CALENDAR_ID,
+                timeMin: this.config.SHOW_PAST_EVENTS ? '(disabled)' : timeMinDate.toISOString(),
+                timeZone: userTimeZone,
+                maxResults: this.config.MAX_RESULTS,
+                urlPreview: url.replace(this.config.API_KEY, 'REDACTED')
+            });
+        } catch (_) {}
         
         const response = await fetch(url);
+        console.log('[Calendar] Fetch response:', { ok: response.ok, status: response.status, statusText: response.statusText });
         
         if (!response.ok) {
             throw new Error(`Calendar API error: ${response.status} ${response.statusText}`);
         }
         
         const data = await response.json();
-        return data.items || [];
+        const items = data.items || [];
+        try {
+            console.debug('[Calendar] Raw items length:', items.length);
+            console.debug('[Calendar] First items (up to 3):', items.slice(0, 3).map(e => ({
+                summary: e.summary,
+                start: e.start,
+                end: e.end
+            })));
+        } catch (_) {}
+        return items;
     }
     
     displayEvents(events) {
+        console.log('[Calendar] displayEvents() with', events.length, 'events');
         this.eventsGrid.innerHTML = '';
         
         events.forEach(event => {
@@ -484,6 +531,7 @@ class CalendarManager {
         
         this.hideLoading();
         this.eventsGrid.style.display = 'grid';
+        console.log('[Calendar] Events rendered. Grid visible:', this.eventsGrid.style.display);
     }
     
     createEventCard(event) {
@@ -516,14 +564,46 @@ class CalendarManager {
         }
         
         // Extract location from event
-        const location = event.location || 'Location TBD';
+        let location = event.location || '';
         
         // Clean up description (remove HTML tags and limit length)
-        let description = event.description || 'No description available';
+        let description = event.description || '';
         description = description.replace(/<[^>]*>/g, ''); // Remove HTML tags
-        if (description.length > 150) {
+        description = description.trim(); // Remove whitespace
+        
+        // If no location in the location field, try to extract from description
+        if (!location || location === '') {
+            // Look for common location patterns in description
+            const locationPatterns = [
+                /(?:at|in|location:?\s*)([\w\s\d]+(?:hall|room|building|center|auditorium|lab|classroom)\s*\d*)/i,
+                /(?:room|rm\.?\s*)(\d+\w*)/i,
+                /(?:woodward|student union|library|gym|cafeteria|dining|parking)\s*(\d+\w*)?/i
+            ];
+            
+            for (const pattern of locationPatterns) {
+                const match = description.match(pattern);
+                if (match) {
+                    location = match[0].replace(/^(at|in|location:?\s*)/i, '').trim();
+                    // Remove the location from description to avoid duplication
+                    description = description.replace(match[0], '').replace(/\s+/g, ' ').trim();
+                    break;
+                }
+            }
+        }
+        
+        // Set default if still no location found
+        if (!location || location === '') {
+            location = 'Location TBD';
+        }
+        
+        // Truncate description if too long
+        let hasDescription = description && description.length > 0;
+        if (hasDescription && description.length > 150) {
             description = description.substring(0, 150) + '...';
         }
+        
+        // Create description HTML only if there's actual content
+        const descriptionHTML = hasDescription ? `<p class="event-description">${description}</p>` : '';
         
         // Create event card HTML with click indicator
         eventCard.innerHTML = `
@@ -533,7 +613,7 @@ class CalendarManager {
             </div>
             <div class="event-content">
                 <h3 class="event-title">${event.summary || 'Untitled Event'}</h3>
-                <p class="event-description">${description}</p>
+                ${descriptionHTML}
                 <div class="event-details">
                     <span class="event-time"><i class="fas fa-clock"></i> ${timeString}</span>
                     <span class="event-location"><i class="fas fa-map-marker-alt"></i> ${location}</span>
@@ -547,6 +627,7 @@ class CalendarManager {
         // Add click event listener to open Google Calendar
         eventCard.addEventListener('click', () => {
             const calendarUrl = this.createGoogleCalendarUrl(event);
+            console.log('[Calendar] Opening Google Calendar URL:', calendarUrl);
             window.open(calendarUrl, '_blank');
         });
         
@@ -595,6 +676,7 @@ class CalendarManager {
     }
     
     showLoading() {
+        console.log('[Calendar] showLoading()');
         if (this.eventsLoading) {
             this.eventsLoading.style.display = 'block';
         }
@@ -607,20 +689,19 @@ class CalendarManager {
     }
     
     hideLoading() {
+        console.log('[Calendar] hideLoading()');
         if (this.eventsLoading) {
             this.eventsLoading.style.display = 'none';
         }
     }
     
     showStaticEvents() {
-        this.hideLoading();
-        if (this.eventsGrid) {
-            this.eventsGrid.style.display = 'grid';
-        }
-        // Static events are already in the HTML, so we just show them
+        console.log('[Calendar] showStaticEvents() - deprecated, showing error instead');
+        this.showError('No events available at this time.');
     }
     
     showError(message) {
+        console.log('[Calendar] showError()', message);
         this.hideLoading();
         if (this.eventsError) {
             this.eventsError.innerHTML = `<p>${message}</p>`;
