@@ -33,20 +33,22 @@ body {
     border-bottom: 1px solid rgba(147, 51, 234, 0.2);
     z-index: 1000;
     transition: all 0.3s ease;
+    height: 100px;
 }
 
 .nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0 3rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 70px;
+    height: 100px;
 }
 
 .logo-text {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 700;
     background: linear-gradient(135deg, #3b82f6, #8b5cf6);
     -webkit-background-clip: text;
@@ -56,13 +58,14 @@ body {
 
 .nav-shortcuts {
     display: flex;
-    gap: 2rem;
+    gap: 2.5rem;
 }
 
 .nav-link {
     color: #e5e7eb;
     text-decoration: none;
     font-weight: 500;
+    font-size: 1.1rem;
     transition: all 0.3s ease;
     position: relative;
 }
@@ -132,8 +135,8 @@ body {
 }
 
 .logo-image {
-    width: 400px;
-    height: 400px;
+    width: 600px;
+    height: 600px;
     object-fit: contain;
     margin: 0 auto;
     display: block;
@@ -147,7 +150,7 @@ body {
 .hero-title {
     font-size: 4rem;
     font-weight: 700;
-    margin-top: -6rem;
+    margin-top: -8rem;
     margin-bottom: 1rem;
     background: linear-gradient(135deg, #ffffff, #e5e7eb);
     -webkit-background-clip: text;
