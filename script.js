@@ -1,5 +1,33 @@
 // Smooth scrolling for navigation links
 document.addEventListener('DOMContentLoaded', function() {
+    // Mobile menu toggle functionality
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    const navShortcuts = document.querySelector('.nav-shortcuts');
+    
+    if (mobileMenuToggle && navShortcuts) {
+        mobileMenuToggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+            navShortcuts.classList.toggle('active');
+        });
+        
+        // Close mobile menu when clicking on a nav link
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                mobileMenuToggle.classList.remove('active');
+                navShortcuts.classList.remove('active');
+            });
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!mobileMenuToggle.contains(e.target) && !navShortcuts.contains(e.target)) {
+                mobileMenuToggle.classList.remove('active');
+                navShortcuts.classList.remove('active');
+            }
+        });
+    }
+
     // Navigation smooth scrolling
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
@@ -253,18 +281,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Gallery Auto-Scroll - Pure CSS Transform Approach
-    console.log('Script loaded!');
     
     setTimeout(() => {
-        console.log('Setting up gallery animation...');
         
         const galleryTrack = document.querySelector('.gallery-track');
         
         if (galleryTrack) {
-            console.log('Gallery track found');
             
             const galleryItems = galleryTrack.querySelectorAll('.gallery-item');
-            console.log('Found', galleryItems.length, 'gallery items');
             
             // Create CSS animation for infinite scroll
             const styleSheet = document.createElement('style');
@@ -284,11 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             document.head.appendChild(styleSheet);
             
-            console.log('Applied pure CSS infinite scroll animation');
-            console.log('Gallery will scroll continuously at faster speed');
             
-        } else {
-            console.log('Gallery track not found');
         }
     }, 1000);
 
@@ -419,26 +439,15 @@ class CalendarManager {
 
         try {
             const maskedKey = this.config.API_KEY ? `${this.config.API_KEY.slice(0, 6)}...${this.config.API_KEY.slice(-4)}` : '(none)';
-            console.log('[Calendar] Constructor config:', {
-                calendarId: this.config.CALENDAR_ID,
-                apiKey: maskedKey,
-                maxResults: this.config.MAX_RESULTS,
-                showPastEvents: this.config.SHOW_PAST_EVENTS
-            });
+
         } catch (_) {}
     }
     
     init() {
-        console.log('[Calendar] init() called');
         this.eventsGrid = document.getElementById('events-grid');
         this.eventsLoading = document.getElementById('events-loading');
         this.eventsError = document.getElementById('events-error');
-        
-        console.log('[Calendar] Elements found:', {
-            hasGrid: !!this.eventsGrid,
-            hasLoading: !!this.eventsLoading,
-            hasError: !!this.eventsError
-        });
+
         
         if (!this.eventsGrid) {
             console.error('[Calendar] Events grid element not found');
@@ -449,27 +458,21 @@ class CalendarManager {
     }
     
     async loadEvents() {
-        console.log('[Calendar] loadEvents() starting');
         this.showLoading();
         
         try {
             // Check if API key is configured
             const hasApiKey = !!this.config.API_KEY && this.config.API_KEY !== '';
-            console.log('[Calendar] API key present?', hasApiKey);
             if (!hasApiKey) {
-                console.log('[Calendar] Google Calendar API key not configured');
                 this.showError('Calendar integration not configured. Please check back later.');
                 return;
             }
             
             const events = await this.fetchCalendarEvents();
-            console.log('[Calendar] fetchCalendarEvents() returned', events ? events.length : 0, 'items');
             
             if (events && events.length > 0) {
                 this.displayEvents(events);
-                console.log(`[Calendar] Loaded ${events.length} events from Google Calendar`);
             } else {
-                console.log('[Calendar] No upcoming events found');
                 this.showError('No upcoming events scheduled at this time. Check back soon for new events!');
             }
             
@@ -489,19 +492,10 @@ class CalendarManager {
         const timeMin = this.config.SHOW_PAST_EVENTS ? '' : `&timeMin=${encodeURIComponent(timeMinDate.toISOString())}`;
         
         const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(this.config.CALENDAR_ID)}/events?key=${this.config.API_KEY}${timeMin}&maxResults=${this.config.MAX_RESULTS}&singleEvents=true&orderBy=startTime&timeZone=${encodeURIComponent(userTimeZone)}`;
-        
-        try {
-            console.log('[Calendar] Fetching events with params:', {
-                calendarId: this.config.CALENDAR_ID,
-                timeMin: this.config.SHOW_PAST_EVENTS ? '(disabled)' : timeMinDate.toISOString(),
-                timeZone: userTimeZone,
-                maxResults: this.config.MAX_RESULTS,
-                urlPreview: url.replace(this.config.API_KEY, 'REDACTED')
-            });
-        } catch (_) {}
+ 
         
         const response = await fetch(url);
-        console.log('[Calendar] Fetch response:', { ok: response.ok, status: response.status, statusText: response.statusText });
+
         
         if (!response.ok) {
             throw new Error(`Calendar API error: ${response.status} ${response.statusText}`);
@@ -521,7 +515,7 @@ class CalendarManager {
     }
     
     displayEvents(events) {
-        console.log('[Calendar] displayEvents() with', events.length, 'events');
+
         this.eventsGrid.innerHTML = '';
         
         events.forEach(event => {
@@ -531,7 +525,7 @@ class CalendarManager {
         
         this.hideLoading();
         this.eventsGrid.style.display = 'grid';
-        console.log('[Calendar] Events rendered. Grid visible:', this.eventsGrid.style.display);
+
     }
     
     createEventCard(event) {
@@ -627,7 +621,6 @@ class CalendarManager {
         // Add click event listener to open Google Calendar
         eventCard.addEventListener('click', () => {
             const calendarUrl = this.createGoogleCalendarUrl(event);
-            console.log('[Calendar] Opening Google Calendar URL:', calendarUrl);
             window.open(calendarUrl, '_blank');
         });
         
@@ -676,7 +669,6 @@ class CalendarManager {
     }
     
     showLoading() {
-        console.log('[Calendar] showLoading()');
         if (this.eventsLoading) {
             this.eventsLoading.style.display = 'block';
         }
@@ -689,19 +681,16 @@ class CalendarManager {
     }
     
     hideLoading() {
-        console.log('[Calendar] hideLoading()');
         if (this.eventsLoading) {
             this.eventsLoading.style.display = 'none';
         }
     }
     
     showStaticEvents() {
-        console.log('[Calendar] showStaticEvents() - deprecated, showing error instead');
         this.showError('No events available at this time.');
     }
     
     showError(message) {
-        console.log('[Calendar] showError()', message);
         this.hideLoading();
         if (this.eventsError) {
             this.eventsError.innerHTML = `<p>${message}</p>`;
