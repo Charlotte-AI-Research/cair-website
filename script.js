@@ -470,8 +470,28 @@ class CalendarManager {
             
             const events = await this.fetchCalendarEvents();
             
-            if (events && events.length > 0) {
-                this.displayEvents(events);
+            // Filter out executive meetings and private events immediately after fetching
+            const filteredEvents = events ? events.filter(event => {
+                const eventTitle = (event.summary || '').toLowerCase();
+                
+                // Filter out executive meetings by title
+                if (eventTitle.includes('cair executive meeting') || 
+                    eventTitle.includes('executive meeting')) {
+                    return false;
+                }
+                
+                // Filter out private events (events with no title or marked as private)
+                if (!event.summary || event.summary.trim() === '' || 
+                    event.visibility === 'private' || 
+                    event.visibility === 'confidential') {
+                    return false;
+                }
+                
+                return true;
+            }) : [];
+            
+            if (filteredEvents && filteredEvents.length > 0) {
+                this.displayEvents(filteredEvents);
             } else {
                 this.showError('No upcoming events scheduled at this time. Check back soon for new events!');
             }
